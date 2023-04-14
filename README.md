@@ -1,18 +1,38 @@
 # Python Sudoku Generator and Sudoku Solver
 
-## about 
+## about
 
-Python based sudoku generator that can create unique Sudoku board based on 4 difficulty levels. This code also includes a brute force sudoku solver that is capable of solving even the most difficult sudoku puzzles! 
-#### Suodku Generator Usage
+Python based Sudoku generator that can create unique Sudoku board based on 4 difficulty levels. This code also includes a brute force Sudoku solver that is capable of solving even the most difficult Sudoku puzzles!
 
-This program requires that you have Python installed on your computer. In terminal, browse to the folder location and run 
+## Sudoku Generator Usage
 
-python sudoku.py main
+### Adjust settings
 
-To adjust the diffculty level of the generated Sudoku puzzle, browse to suodku.py and change the variable 'level' to the desired difficulty levels, which include ‘Easy’ ‘Medium’ ‘Hard’ and ‘Insane’.
+#### Difficulty
 
+To adjust the difficulty level of the generated Sudoku puzzle, browse to sudoku.py and change the variable 'level' to the desired difficulty levels, which include `Easy`, `Medium`, `Hard` and `Insane`.
 
-****B.Y.O.T (bring your own tests)****
+#### Size
+
+To adjust the size of the generated Sudoku set the variable 'size' to an value from 2 or higher.
+The standard Sudoku size value is '3'.
+This means a $3^2 = 9$ is the highest possible number.
+
+| size | number range |
+| :--: | :----------: |
+|  2   |   1 ... 4    |
+|  3   |   1 ... 9    |
+|  4   |   1 ... 16   |
+|  5   |   1 ... 25   |
+| ...  |     ...      |
+
+### Run script
+
+``` sh
+python sudoku.py
+```
+
+**B.Y.O.T (bring your own tests)**
 
 See more at www.callmejoe.net
 Made by Joe Carlson 2015
