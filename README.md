@@ -6,6 +6,26 @@ Python based Sudoku generator that can create unique Sudoku board based on 4 dif
 
 ## Sudoku Generator Usage
 
+### Install environment
+
+For a Windows system with git bash use the following commands to set up an virtual python environment.
+
+``` sh
+python -m venv venv
+```
+
+### Activate environment
+
+``` sh
+source venv/Scripts/activate
+```
+
+### Install requirements
+
+``` sh
+pip install -r requirements.txt
+```
+
 ### Adjust settings
 
 #### Difficulty
@@ -15,7 +35,7 @@ To adjust the difficulty level of the generated Sudoku puzzle, browse to sudoku.
 #### Size
 
 To adjust the size of the generated Sudoku set the variable 'size' to an value from 2 or higher.
-The standard Sudoku size value is '3'.
+The standard Sudoku size value is `3`.
 This means a $3^2 = 9$ is the highest possible number.
 
 | size | number range |
@@ -25,6 +45,14 @@ This means a $3^2 = 9$ is the highest possible number.
 |  4   |   1 ... 16   |
 |  5   |   1 ... 25   |
 | ...  |     ...      |
+
+#### Amount
+
+To adjust the amount of created Sudokus set the variable 'amount' to desired quantity.
+
+#### Output
+
+To adjust the way of output, set the variables 'print_console' and 'export_excel' to `True` or `False`.
 
 ### Run script
 

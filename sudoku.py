@@ -2,11 +2,18 @@
 # -*- coding: utf-8 -*-
 import copy
 import math
+import os
 import random
 import time
+from openpyxl import load_workbook, Workbook
+from openpyxl.styles import Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 level = "Medium"
-size = 2
+size = 3
+amount = 2
+print_console = False
+export_excel = True
 
 # [Level of Difficulty] = Input the level of difficulty of the Sudoku puzzle. Difficulty levels
 #        include ‘Easy’ ‘Medium’ ‘Hard’ and ‘Insane’. Outputs a Sudoku of desired
@@ -16,6 +23,11 @@ size = 2
 # 3 -> 3 * 3 = 9 -> numbers 1 ... 9
 # 4 -> 4 * 4 = 16 -> numbers 1 ... 16
 # 5 -> 5 * 5 = 25 -> numbers 1 ... 25
+# ...
+
+# 2 -> 18 per page
+# 3 -> 2 per page
+# 4 -> 1 per page
 # ...
 
 class cell():
@@ -172,6 +184,118 @@ def printSudoku(sudoku):
                 elif column % 4 > 0:
                     print("─", end = '')
     print("")
+
+def exportSudoku(sudoku, count = 0, solution=False):
+    size = sudoku[0].returnSize()
+    columns = size**2
+
+    if solution:
+        filename = f'sudoku_{columns}x{columns}_{level}_Solution.xlsx'
+    else:
+        filename = f'sudoku_{columns}x{columns}_{level}.xlsx'
+
+    MAX_COLUMN_PER_PAGE = 16
+    MAX_ROW_PER_PAGE = 28
+
+    max_sudoku_per_row = max(1,math.floor(MAX_COLUMN_PER_PAGE/(columns+1)))
+
+    position_column = count%max_sudoku_per_row
+    position_row = math.floor(count/max_sudoku_per_row)
+    
+    offset_column = position_column * (columns + 1)
+    offset_row = position_row * (columns + 1)
+
+    if os.path.isfile(filename):
+        wb = load_workbook(filename)
+    else:
+        wb = Workbook()
+    ws = wb.active
+
+    thin = Side(border_style="thin", color="00808080")
+    thick = Side(border_style="thick", color="00808080")
+
+    border = Border(left=thin,
+                    right=thin,
+                    top=thin,
+                    bottom=thin,
+                )
+    borderlefttop = Border(left=thick,
+                    right=thin,
+                    top=thick,
+                    bottom=thin,
+                )
+    borderleft = Border(left=thick,
+                    right=thin,
+                    top=thin,
+                    bottom=thin,
+                )
+    borderleftbottom = Border(left=thick,
+                    right=thin,
+                    top=thin,
+                    bottom=thick,
+                )
+    borderbottom = Border(left=thin,
+                    right=thin,
+                    top=thin,
+                    bottom=thick,
+                )
+    borderrightbottom = Border(left=thin,
+                    right=thick,
+                    top=thin,
+                    bottom=thick,
+                )
+    borderright = Border(left=thin,
+                    right=thick,
+                    top=thin,
+                    bottom=thin,
+                )
+    borderrighttop = Border(left=thin,
+                    right=thick,
+                    top=thick,
+                    bottom=thin,
+                )
+    bordertop = Border(left=thin,
+                    right=thin,
+                    top=thick,
+                    bottom=thin,
+                )
+    
+    alignment=Alignment(horizontal='center',
+                     vertical='center',
+                     text_rotation=0,
+                     wrap_text=False,
+                     shrink_to_fit=False,
+                     indent=0)
+
+    for row in range(columns):
+        ws.row_dimensions[row+1+offset_row].height = 25
+        for column in range(columns):
+            ws.column_dimensions[get_column_letter(column+1+offset_column)].width = 5
+            value = sudoku[row*columns+column].returnSolved()
+            if value == 0:
+                value = ''
+            cell = ws.cell(row=row+1+offset_row, column=column+1+offset_column, value=value)
+            if row%size == 0 and column%size == 0:
+                cell.border = borderlefttop
+            elif row%size == 0 and (column+1)%size == 0:
+                cell.border = borderrighttop
+            elif row%size == 0:
+                cell.border = bordertop
+            elif (row+1)%size == 0 and column%size == 0:
+                cell.border = borderleftbottom
+            elif (row+1)%size == 0 and (column+1)%size == 0:
+                cell.border = borderrightbottom
+            elif (row+1)%size == 0:
+                cell.border = borderbottom
+            elif column%size == 0:
+                cell.border = borderleft
+            elif (column+1)%size == 0:
+                cell.border = borderright
+            else:
+                cell.border = border
+            cell.alignment = alignment
+
+    wb.save(filename)
 
 def sudokuGen(size):
     # Generates a completed Sudoku. Sudoku is completely random
@@ -343,7 +467,7 @@ def equalChecker(s1,s2):
             return False
     return True
 
-def main(level, size):
+def main(level, size, count):
     # Input the level of difficulty of the sudoku puzzle. Difficulty levels
     #    include ‘Easy’ ‘Medium’ ‘Hard’ and ‘Insane’. Outputs a sudoku of desired
     #    difficulty.
@@ -351,46 +475,55 @@ def main(level, size):
     t1 = time.time()
     n = 0
 
+    print("------------------------------")
+    print(f"Sudoku number: {count}")
+
     p = perfectSudoku(size)
+    if export_excel:
+        exportSudoku(p, count, solution=True)
     s = puzzleGen(p, size)
     
     if level == 'Easy':
         if s[2] != 'Easy':
-            return main(level, size)
+            return main(level, size, count)
     if level == 'Medium':
         while s[2] == 'Easy':
             n += 1
             s = puzzleGen(p, size)
             if n > 50:
-                return main(level, size)
+                return main(level, size, count)
         if s[2] != 'Medium':
-            return main(level, size)
+            return main(level, size, count)
     if level == 'Hard':
         while s[2] == 'Easy':
             n += 1
             s = puzzleGen(p, size)
             if n > 50:
-                return main(level, size)
+                return main(level, size, count)
         while s[2] == 'Medium':
             n += 1
             s = puzzleGen(p, size)
             if n > 50:
-                return main(level, size)
+                return main(level, size, count)
         if s[2] != 'Hard':
-            return main(level, size)
+            return main(level, size, count)
     if level == 'Insane':
         while s[2] != 'Insane':
             n += 1
             s = puzzleGen(p, size)
             if n > 50:
-                return main(level, size)
+                return main(level, size, count)
     
     t2 = time.time()
     t3 = t2 - t1
     print("Runtime is " + str(t3) + " seconds")
     print("Guesses: " + str(s[1]))
     print("Level: " + str(s[2]))
-    printSudoku(s[0])
+    if export_excel:
+        exportSudoku(s[0], count)
+    if print_console:
+        printSudoku(s[0])
     return
 
-main(level, size)
+for i in range(amount):
+    main(level, size, i)
