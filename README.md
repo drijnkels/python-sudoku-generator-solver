@@ -62,5 +62,7 @@ python sudoku.py
 
 **B.Y.O.T (bring your own tests)**
 
+`No longer active as of 2024`
+
 See more at www.callmejoe.net
 Made by Joe Carlson 2015
