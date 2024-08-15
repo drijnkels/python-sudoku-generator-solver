@@ -97,8 +97,11 @@ class Cell:
 def empty_sudoku():
     grid = []
     for x in list(range(1, size ** 2 + 1)):
+        intitial_z = math.floor((x-1)/size)*size+1
         for y in list(range(1, size ** 2 + 1)):
-            z = ((x - 1) * (size ** 2)) + y
+            z = intitial_z
+            z += math.floor((y-1)/size)
+            # z = ((x - 1) * (size ** 2)) + y
             c = Cell((x, y, z))
             grid.append(c)
     return grid
@@ -313,7 +316,7 @@ def print_sudoku_sequence(sudoku):
     for c in range(0, len(sudoku)):
         cell_values.append(sudoku[c].return_answer_if_solved())
 
-    print(cell_values)
+    print(''.join(str(x) for x in cell_values))
     return cell_values
 
 
@@ -393,7 +396,7 @@ def gen_completed_sudoku():
     result = sudoku_checker(sudoku)
 
     # Only return the Sudoku if it is a valid Sudoku
-    while not result:
+    while result is False:
         sudoku = sudoku_generator()
         result = sudoku_checker(sudoku)
 
@@ -517,8 +520,6 @@ def generate_sudoku(sudoku):
         # Remove position from the list
         cells.remove(rand_index)
 
-        print(f"Removing {rand_index}")
-
         # Empty Cell and reset all settings on it
         copy_s[rand_index].reset_cell()
 
@@ -534,25 +535,17 @@ def generate_sudoku(sudoku):
             if equal_checker(solved[0], solve(copy_s)[0]):
                 # Run the check again to make sure there is no second solution to the puzzle
                 if equal_checker(solved[0], solve(copy_s)[0]):
-                    print(f'Emptying Cell {rand_index}')
                     sudoku[rand_index].reset_cell()
                     cells_emptied += 1
                     single_answer = True
-                    # print(sudoku[rand_index].return_answer_if_solved())
             if not single_answer:
                 # If the Sudoku cannot be solved and there is more than 1 answer possible for the new board return the
                 # Sudoku as it was in the previous loop
-                print(f'Found more than 1 answer, returning sudoku after emptying {cells_emptied} cells')
-                print_sudoku_sequence(sudoku)
                 f = solve(sudoku)
-                return f
+                return sudoku, f[1]
         else:
-            print(f'Could no longer solve the sudoku, returning sudoku after emptying {cells_emptied} cells')
-            print_sudoku_sequence(sudoku)
             f = solve(sudoku)
-            print("Guesses: " + str(f[1]))
-            print("Level: " + decide_difficulty_level(f[1]))
-            return f
+            return sudoku, f[1]
 
 # Test two board results to make sure they're equal
 def equal_checker(s1, s2):
@@ -570,12 +563,11 @@ def main():
     puzzles_created = []
 
     # while len(puzzles_created) < amount:
-    print("------------------------------")
-    print(f"Sudoku number: {len(puzzles_created) + 1}")
 
     # Get a completed & valid Sudoku
     # completed meaning all Cells have a valid digit
     completed_puzzle = gen_completed_sudoku()
+    solution = copy.deepcopy(completed_puzzle)
 
     puzzle_attempt = 0
     max_attempts = 100
@@ -588,7 +580,7 @@ def main():
         # If the Sudoku is of the desired level add it to our list and create the next one
         if sudoku_level == level:
             puzzles_created.append(sudoku)
-            print(f"{puzzle_attempt+1} created a valid puzzle")
+            print_sudoku_sequence(solution)
             print_sudoku_sequence(sudoku[0])
             break
 
