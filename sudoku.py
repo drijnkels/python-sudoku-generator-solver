@@ -12,9 +12,9 @@ from openpyxl.utils import get_column_letter
 # Difficulty level can be 'Easy' | 'Medium' | 'Hard' | 'Insane'
 level = "Medium"
 size = 3
-amount = 2  # Number of Sudoku to produce
-print_console = False  # Print to Python console
-export_excel = True  # Export Sudoku to excel
+amount = 1  # Number of Sudoku to produce
+print_console = True  # Print to Python console
+export_excel = False  # Export Sudoku to excel
 
 
 # Sudoku sizes, size is grid size.
@@ -53,10 +53,6 @@ class Cell:
                 self.solved = True
         if num in self.notes and self.solved is True:
             self.answer = 0
-
-    # Return solved status of a Cell
-    def is_cell_sovled(self):
-        return self.solved
 
     # Return the position of cell within a Sudoku puzzle x = row; y = col; z = box number
     def get_cell_position(self):
@@ -312,11 +308,15 @@ def export_sudoku_to_excel(sudoku, count=0, solution=False):
 
 
 def print_sudoku_sequence(sudoku):
-    cell_values = []
+    cell_values = ''
     for c in range(0, len(sudoku)):
-        cell_values.append(sudoku[c].return_answer_if_solved())
+        cell_values += str(sudoku[c].return_answer_if_solved())
 
-    print(''.join(str(x) for x in cell_values))
+    # Split board into groups of 9, so they can be copied into
+    # https://github.com/drijnkels/sudoku
+    spaced_values = ' '.join(cell_values[i:i+9] for i in range(0, len(cell_values), 9))
+
+    print(spaced_values)
     return cell_values
 
 
@@ -487,7 +487,6 @@ def solver(sudoku, f=0):
 
     # Test to see if a valid solution was found and if so how many guesses it took
     if sudoku_checker(copy_s):
-        print(f'Solved sudoku in {guesses} guesses')
         return copy_s, guesses
     # If not attempt to solve again
     else:
@@ -528,7 +527,7 @@ def generate_sudoku(sudoku):
 
         # If after removing this digit the Sudoku can no longer be solved
         # Return the Sudoku in the state before this loop
-        if solved[0]:
+        if solved and solved[0]:
             # If the Sudoku can still be solved remove the same empty cell from the original Sudoku
             # Make sure the solution results in the same board state if solved again
             single_answer = False
@@ -562,41 +561,44 @@ def main():
     t1 = time.time()
     puzzles_created = []
 
-    # while len(puzzles_created) < amount:
+    while len(puzzles_created) < amount:
 
-    # Get a completed & valid Sudoku
-    # completed meaning all Cells have a valid digit
-    completed_puzzle = gen_completed_sudoku()
-    solution = copy.deepcopy(completed_puzzle)
+        # Get a completed & valid Sudoku
+        # completed meaning all Cells have a valid digit
+        completed_puzzle = gen_completed_sudoku()
+        solution = copy.deepcopy(completed_puzzle)
 
-    puzzle_attempt = 0
-    max_attempts = 100
+        puzzle_attempt = 0
+        max_attempts = 100
 
-    while puzzle_attempt < max_attempts:
-        # Use the completed puzzle and empty cells to create a Sudoku
-        sudoku = generate_sudoku(completed_puzzle)
-        sudoku_level = decide_difficulty_level(sudoku[1])
+        while puzzle_attempt < max_attempts:
+            # Use the completed puzzle and empty cells to create a Sudoku
+            sudoku = generate_sudoku(completed_puzzle)
+            sudoku_level = decide_difficulty_level(sudoku[1])
 
-        # If the Sudoku is of the desired level add it to our list and create the next one
-        if sudoku_level == level:
-            puzzles_created.append(sudoku)
-            print_sudoku_sequence(solution)
-            print_sudoku_sequence(sudoku[0])
-            break
+            # If the Sudoku is of the desired level add it to our list and create the next one
+            if sudoku_level == level:
+                print('*****************************')
+                puzzles_created.append(sudoku)
+                print('Solution')
+                print_sudoku_sequence(solution)
+                print(f'Puzzle requires {sudoku[1]} guesses')
+                print_sudoku_sequence(sudoku[0])
+                break
 
-        puzzle_attempt += 1
+            puzzle_attempt += 1
 
     # Get time after creating puzzles
     t2 = time.time()
     t3 = t2 - t1
     print("Runtime is " + str(t3) + " seconds")
 
-    print(f'Created {len(puzzles_created)} puzzles at difficulty level {level} in {puzzle_attempt} attempts')
+    print(f'Created {len(puzzles_created)} puzzles at difficulty level {level}')
 
     # if export_excel:
     #     export_sudoku_to_excel(sudoku[0], count)
-    # if print_console:
-    #     print_sudoku(sudoku[0])
+    if print_console:
+        print_sudoku(sudoku[0])
     return
 
 
