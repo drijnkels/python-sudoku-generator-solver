@@ -97,7 +97,6 @@ def empty_sudoku():
         for y in list(range(1, size ** 2 + 1)):
             z = intitial_z
             z += math.floor((y-1)/size)
-            # z = ((x - 1) * (size ** 2)) + y
             c = Cell((x, y, z))
             grid.append(c)
     return grid
